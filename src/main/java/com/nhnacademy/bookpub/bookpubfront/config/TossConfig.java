@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
  * @author : 임태원
  * @since : 1.0
  **/
-@Configuration
 @ConfigurationProperties(prefix = "toss")
 @RequiredArgsConstructor
 public class TossConfig {
