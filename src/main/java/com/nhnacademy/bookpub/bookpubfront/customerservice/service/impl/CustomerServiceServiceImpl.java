@@ -29,7 +29,7 @@ public class CustomerServiceServiceImpl implements CustomerServiceService {
      * {@inheritDoc}
      */
     @Override
-    @CacheEvict(cacheNames = "customerService", allEntries = true)
+//    @CacheEvict(cacheNames = "customerService", allEntries = true)
     public void createCustomerService(CreateCustomerServiceRequestDto requestDto, MultipartFile image) {
         MultiValueMap<String, Object> requestMap = new LinkedMultiValueMap<>();
         requestMap.add("requestDto", requestDto);
@@ -42,7 +42,7 @@ public class CustomerServiceServiceImpl implements CustomerServiceService {
      * {@inheritDoc}
      */
     @Override
-    @Cacheable(cacheNames = "customerService", key = "'service:' + #pageable.pageNumber")
+//    @Cacheable(cacheNames = "customerService", key = "'service:' + #pageable.pageNumber")
     public PageResponse<GetCustomerServiceListResponseDto> getCustomerServices(Pageable pageable) {
         return customerServiceAdaptor.getCustomerServices(pageable);
     }
@@ -51,7 +51,7 @@ public class CustomerServiceServiceImpl implements CustomerServiceService {
      * {@inheritDoc}
      */
     @Override
-    @Cacheable(cacheNames = "customerService", key = "'code:'+#name+'page'+#pageable.pageNumber")
+//    @Cacheable(cacheNames = "customerService", key = "'code:'+#name+'page'+#pageable.pageNumber")
     public PageResponse<GetCustomerServiceListResponseDto> getCustomerServiceByCodeName(String name, Pageable pageable) {
         return customerServiceAdaptor.getCustomerServiceByCodeName(name, pageable);
     }
@@ -60,7 +60,7 @@ public class CustomerServiceServiceImpl implements CustomerServiceService {
      * {@inheritDoc}
      */
     @Override
-    @Cacheable(cacheNames = "customerService", key = "'category:'+#category+'page'+#pageable.pageNumber")
+//    @Cacheable(cacheNames = "customerService", key = "'category:'+#category+'page'+#pageable.pageNumber")
     public PageResponse<GetCustomerServiceListResponseDto> getCustomerServiceByCategory(String category, Pageable pageable) {
         return customerServiceAdaptor.getCustomerServiceByCategory(category, pageable);
     }
@@ -77,7 +77,7 @@ public class CustomerServiceServiceImpl implements CustomerServiceService {
      * {@inheritDoc}
      */
     @Override
-    @CacheEvict(cacheNames = "customerService", allEntries = true)
+//    @CacheEvict(cacheNames = "customerService", allEntries = true)
     public void deleteCustomerService(Integer serviceNo) {
         customerServiceAdaptor.deleteCustomerService(serviceNo);
     }
