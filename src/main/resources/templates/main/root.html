@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>BookPub</title>
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="/static/css/main/root/bootstrap.min.css"/>
+    <!-- Slick -->
+    <link type="text/css" rel="stylesheet" href="/static/css/main/root/slick.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/main/root/slick-theme.css"/>
+    <!-- nouislider -->
+    <link type="text/css" rel="stylesheet" href="/static/css/main/root/nouislider.min.css"/>
+    <!-- Custom stlylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/main/root/style.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/main/custom.css"/>
+
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <style>
+        .cursor {
+            cursor: pointer;
+        }
+
+        .wrap {
+        }
+
+        /* 가로 스크롤 적용 */
+        .scroll__wrap {
+            overflow-x: auto;
+            white-space: nowrap;
+            font-size: 0
+        }
+
+        .scroll__wrap::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scroll--element {
+            display: inline-block;
+            width: 200px;
+            height: 80px;
+            font-size: 16px;
+            text-align: center;
+            margin: 1%;
+        }
+    </style>
+</head>
+<body>
+<th:block th:include="main/fragments/rootHeader"></th:block>
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-xs-6" style="margin-top: 50px;">
+                <div class="shop" style="height: 202px" onclick="location.href='/types/1'">
+                    <div class="shop-img">
+                        <img src="https://api-storage.cloud.toast.com/v1/AUTH_fcb81f74e379456b8ca0e091d351a7af/bookpub/front/bestSeller.jpg"
+                             alt="">
+                    </div>
+                    <div class="shop-body">
+                        <h3>Best-Seller<br>Collection</h3>
+                        <a href="/types/1" class="cta-btn">쇼핑하러 가기 <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-xs-6" style="margin-top: 50px;">
+                <div class="shop" style="height: 202px" onclick="location.href='/products/ebooks'">
+                    <div class="shop-img">
+                        <img src="https://api-storage.cloud.toast.com/v1/AUTH_fcb81f74e379456b8ca0e091d351a7af/bookpub/front/ebook.jpg"
+                             alt="">
+                    </div>
+                    <div class="shop-body">
+                        <h3>E-Book<br>Collection</h3>
+                        <a href="/products/ebooks" class="cta-btn">쇼핑하러 가기 <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 col-xs-6">
+                <div style="position: relative; overflow: hidden; margin: 15px 0px;">
+                    <div class="wrap-vertical">
+                        <div class="wrap" style="height: 310px">
+                            <h4 style="padding-top: 2%; padding-left: 2%">
+                                <ion-icon name="bookmark"></ion-icon>
+                                Recent Views
+                            </h4>
+                            <hr style="border: black 1px solid">
+                            <div class="scroll__wrap" style="overflow-y: hidden;">
+                                <div class="scroll--element" th:each="recentView: ${recentViews}">
+                                    <div class="panel">
+                                        <img class="img-thumbnail cursor" th:src="${recentView.filePath}"
+                                             style="object-fit: cover; width: 130px; height: 180px" alt=""
+                                             onerror="this.src=null; this.src='/static/image.review/no-image.png';"
+                                             th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recentView.productNo})} + '\''">
+                                        <hr>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="section-title">
+                    <h3 class="title">신간 도서 상품</h3>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="products-tabs">
+                        <div id="tab1" class="tab-pane active">
+                            <div class="products-slick" data-nav="#slick-nav-1">
+
+                                <div th:each="newBook :${newBooks}" style="padding: 15px !important;">
+                                    <div class="product">
+                                        <div class="product-img" style="width: 100%; height: 370px;">
+                                            <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                                 th:if="${#strings.isEmpty(newBook.getThumbnail)}"
+                                                 src="/static/img/main/no-image.png"
+                                                 alt=""
+                                                 th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${newBook.productNo})} + '\''">
+
+                                            <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                                 th:if="${not #strings.isEmpty(newBook.getThumbnail)}"
+                                                 th:src="@{${newBook.getThumbnail()}}"
+                                                 alt="no image"
+                                                 th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${newBook.productNo})} + '\''">
+
+                                            <div class="product-label">
+                                                <span class="sale" th:if="${newBook.salesRate} != 0"
+                                                      th:text="'-'+${newBook.salesRate} +'%'"></span>
+                                                <span class="new">NEW</span>
+                                            </div>
+                                        </div>
+                                        <div class="product-body">
+                                            <div th:each="category :${newBook.productCategories}">
+                                                <span class="product-category" th:text="${category}"></span>
+                                            </div>
+                                            <h3 class="product-name" style="height: 5rem !important; display: flex;align-items: center;justify-content: center;">
+                                                <a th:href="@{/products/{productNo}(productNo=${newBook.productNo})}"
+                                                   th:text="${newBook.title}"></a>
+                                            </h3>
+                                            <del class="product-old-price"
+                                                 th:text="|${#numbers.formatInteger(newBook.productPrice, 0, 'COMMA')}원|"></del>
+                                            <h4 class="product-price"
+                                                th:text="|${#numbers.formatInteger(newBook.salesPrice, 0, 'COMMA')}원|"></h4>
+                                            <div class="product-btns">
+                                                <button class="add-to-wishlist"
+                                                        th:productNo="${newBook.productNo}"
+                                                        th:onclick="clickLike(this.getAttribute('productNo'))">
+                                                    <i class="fa fa-heart-o"></i>
+                                                    <span class="tooltipp">Like</span>
+                                                </button>
+                                                <button class="quick-view"
+                                                        th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${newBook.productNo})} + '\''">
+                                                    <i class="fa fa-eye"></i><span class="tooltipp">Information</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="slick-nav-1" class="products-slick-nav"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="section-title">
+                    <h3 class="title">인기 도서 상품</h3>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="products-tabs">
+                        <div id="tab2" class="tab-pane active">
+                            <div class="products-slick" data-nav="#slick-nav-2">
+
+                                <div th:each="bestSeller :${bestSellers}" style="padding: 15px !important;">
+                                    <div class="product">
+                                        <div class="product-img" style="width: 100%; height: 370px;">
+                                            <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                                 th:if="${#strings.isEmpty(bestSeller.getThumbnail)}"
+                                                 src="/static/img/main/no-image.png"
+                                                 alt=""
+                                                 th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${bestSeller.productNo})} + '\''">
+
+                                            <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                                 th:if="${not #strings.isEmpty(bestSeller.getThumbnail)}"
+                                                 th:src="@{${bestSeller.getThumbnail()}}"
+                                                 alt="no image"
+                                                 th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${bestSeller.productNo})} + '\''">
+
+                                            <div class="product-label">
+                                                <span class="sale" th:if="${bestSeller.salesRate} != 0"
+                                                      th:text="'-'+${bestSeller.salesRate} +'%'"></span>
+                                                <span class="best">BEST</span>
+                                            </div>
+                                        </div>
+                                        <div class="product-body">
+                                            <div th:each="category :${bestSeller.productCategories}">
+                                                <span class="product-category" th:text="${category}"></span>
+                                            </div>
+                                            <h3 class="product-name"  style="height: 5rem !important; display: flex;align-items: center;justify-content: center;">
+                                                <a th:href="@{/products/{productNo}(productNo=${bestSeller.productNo})}"
+                                                   th:text="${bestSeller.title}"></a>
+                                            </h3>
+                                            <del class="product-old-price"
+                                                 th:text="|${#numbers.formatInteger(bestSeller.productPrice, 0, 'COMMA')}원|"></del>
+                                            <h4 id="money" class="product-price"
+                                                th:text="|${#numbers.formatInteger(bestSeller.salesPrice, 0, 'COMMA')}원|"></h4>
+                                            <div class="product-btns">
+                                                <button class="add-to-wishlist"
+                                                        th:productNo="${bestSeller.productNo}"
+                                                        th:onclick="clickLike(this.getAttribute('productNo'))">
+                                                    <i class="fa fa-heart-o"></i>
+                                                    <span class="tooltipp">Like</span>
+                                                </button>
+
+                                                <button class="quick-view"
+                                                        th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${bestSeller.productNo})} + '\''">
+                                                    <i class="fa fa-eye"></i><span class="tooltipp">Information</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="slick-nav-2" class="products-slick-nav"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-xs-6">
+                <div class="section-title">
+                    <h4 class="title">인기 상품</h4>
+                    <div class="section-nav">
+                        <div id="slick-nav-3" class="products-slick-nav"></div>
+                    </div>
+                </div>
+
+                <div class="products-widget-slick" data-nav="#slick-nav-3">
+                    <div>
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(populars[0].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[0].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(populars[0].getThumbnail)}"
+                                     th:src="@{${populars[0].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[0].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${populars[0].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${populars[0].productNo})}"
+                                       th:text="${populars[0].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(populars[0].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(populars[0].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(populars[1].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[1].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(populars[1].getThumbnail)}"
+                                     th:src="@{${populars[1].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[1].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${populars[1].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${populars[1].productNo})}"
+                                       th:text="${populars[1].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(populars[1].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(populars[1].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(populars[2].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[2].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(populars[2].getThumbnail)}"
+                                     th:src="@{${populars[2].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[2].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${populars[2].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${populars[2].productNo})}"
+                                       th:text="${populars[2].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(populars[2].productPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(populars[2].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(populars[3].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[3].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(populars[3].getThumbnail)}"
+                                     th:src="@{${populars[3].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[3].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${populars[3].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${populars[3].productNo})}"
+                                       th:text="${populars[3].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(populars[3].productPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(populars[3].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(populars[4].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[4].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(populars[4].getThumbnail)}"
+                                     th:src="@{${populars[4].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[4].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${populars[4].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${populars[4].productNo})}"
+                                       th:text="${populars[4].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(populars[4].productPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(populars[4].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(populars[5].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[5].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(populars[5].getThumbnail)}"
+                                     th:src="@{${populars[5].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${populars[5].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${populars[5].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${populars[5].productNo})}"
+                                       th:text="${populars[5].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(populars[5].productPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(populars[5].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-xs-6">
+                <div class="section-title">
+                    <h4 class="title">할인 상품</h4>
+                    <div class="section-nav">
+                        <div id="slick-nav-4" class="products-slick-nav"></div>
+                    </div>
+                </div>
+
+                <div class="products-widget-slick" data-nav="#slick-nav-4">
+                    <div>
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(discounts[0].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[0].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(discounts[0].getThumbnail)}"
+                                     th:src="@{${discounts[0].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[0].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${discounts[0].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${discounts[0].productNo})}"
+                                       th:text="${discounts[0].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(discounts[0].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(discounts[0].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(discounts[1].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[1].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(discounts[1].getThumbnail)}"
+                                     th:src="@{${discounts[1].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[1].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${discounts[1].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${discounts[1].productNo})}"
+                                       th:text="${discounts[1].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(discounts[1].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(discounts[1].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(discounts[2].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[2].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(discounts[2].getThumbnail)}"
+                                     th:src="@{${discounts[2].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[2].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${discounts[2].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${discounts[2].productNo})}"
+                                       th:text="${discounts[2].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(discounts[2].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(discounts[2].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(discounts[3].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[3].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(discounts[3].getThumbnail)}"
+                                     th:src="@{${discounts[3].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[3].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${discounts[3].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${discounts[3].productNo})}"
+                                       th:text="${discounts[3].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(discounts[3].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(discounts[3].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(discounts[4].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[4].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(discounts[4].getThumbnail)}"
+                                     th:src="@{${discounts[4].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[4].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${discounts[4].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${discounts[4].productNo})}"
+                                       th:text="${discounts[4].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(discounts[4].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(discounts[4].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(discounts[5].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[5].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(discounts[5].getThumbnail)}"
+                                     th:src="@{${discounts[5].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${discounts[5].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${discounts[5].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${discounts[5].productNo})}"
+                                       th:text="${discounts[5].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(discounts[5].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(discounts[5].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clearfix visible-sm visible-xs"></div>
+
+            <div class="col-md-4 col-xs-6">
+                <div class="section-title">
+                    <h4 class="title">북펍 추천</h4>
+                    <div class="section-nav">
+                        <div id="slick-nav-5" class="products-slick-nav"></div>
+                    </div>
+                </div>
+
+                <div class="products-widget-slick" data-nav="#slick-nav-5">
+                    <div>
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(recommends[0].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[0].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(recommends[0].getThumbnail)}"
+                                     th:src="@{${recommends[0].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[0].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${recommends[0].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${recommends[0].productNo})}"
+                                       th:text="${recommends[0].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(recommends[0].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(recommends[0].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(recommends[1].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[1].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(recommends[1].getThumbnail)}"
+                                     th:src="@{${recommends[1].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[1].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${recommends[1].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${recommends[1].productNo})}"
+                                       th:text="${recommends[1].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(recommends[1].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(recommends[1].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(recommends[2].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[2].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(recommends[2].getThumbnail)}"
+                                     th:src="@{${recommends[2].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[2].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${recommends[2].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${recommends[2].productNo})}"
+                                       th:text="${recommends[2].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(recommends[2].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(recommends[2].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(recommends[3].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[3].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(recommends[3].getThumbnail)}"
+                                     th:src="@{${recommends[3].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[3].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${recommends[3].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${recommends[3].productNo})}"
+                                       th:text="${recommends[3].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(recommends[3].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(recommends[3].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(recommends[4].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[4].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(recommends[4].getThumbnail)}"
+                                     th:src="@{${recommends[4].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[4].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${recommends[4].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${recommends[4].productNo})}"
+                                       th:text="${recommends[4].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(recommends[4].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(recommends[4].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="product-widget">
+                            <div class="product-img">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${#strings.isEmpty(recommends[5].getThumbnail)}"
+                                     src="/static/img/main/no-image.png"
+                                     alt=""
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[5].productNo})} + '\''">
+                                <img class="cursor" style="width: 100%; height: 100%; object-fit: cover;"
+                                     th:if="${not #strings.isEmpty(recommends[5].getThumbnail)}"
+                                     th:src="@{${recommends[5].getThumbnail()}}"
+                                     alt="no image"
+                                     th:onclick="'location.href=\''+ @{/products/{productNo}(productNo=${recommends[5].productNo})} + '\''">
+                            </div>
+                            <div class="product-body">
+                                <div th:each="category : ${recommends[5].getProductCategories()}">
+                                    <p class="product-category" th:text="${category}"></p>
+                                </div>
+                                <h3 class="product-name">
+                                    <a th:href="@{/products/{productNo}(productNo=${recommends[5].productNo})}"
+                                       th:text="${recommends[5].getTitle()}"></a>
+                                </h3>
+                                <h4 class="product-price"
+                                    th:text="|${#numbers.formatInteger(recommends[5].salesPrice, 0, 'COMMA')}원|">
+                                    <del class="product-old-price"
+                                         th:text="|${#numbers.formatInteger(recommends[5].productPrice, 0, 'COMMA')}원|"></del>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--주문결과창 모달-->
+<div th:if="${order != '0'}">
+    <div id="order-modal-container" class="modal-overlay1">
+        <div class="modal_box1">
+            <div id="payment-success-body" style="width: 100%;height: 100%;">
+                <div id="body-inner">
+                    <div id="payment-header">
+                        <div id="button-container">
+                            <button id="receipt-btn" type="button" th:onclick="receipt([[${opInfo.receiptUrl}]])">결제 영수증
+                            </button>
+                        </div>
+                        <p style="margin: 0 !important;color: #5f5e5e;">비회원 주문 시 주문번호를 꼭 저장해 주세요 주문조회에 사용됩니다.</p>
+                        <span onclick="modalClose()" style="cursor:pointer; font-size: 26px;font-weight: 600;">X</span>
+                    </div>
+                    <div id="payment-body">
+                        <h1>BookPub 주문이 완료되었습니다.</h1>
+                        <h3 th:text="'주문번호 : '+${order}"></h3>
+                        <div id="info-container">
+                            <div id="order-info">
+                                <table class="tbl_prod">
+                                    <colgroup>
+                                        <col style="width: 13rem">
+                                        <col style="width: auto">
+                                    </colgroup>
+                                    <thead class="hidden">
+                                    <tr>
+                                        <th scope="col">컬럼</th>
+                                        <th scope="col">내용</th>
+                                    </tr>
+                                    <tbody>
+                                    <tr>
+                                        <td class="order-index">주문명 :</td>
+                                        <td class="order-content" th:text="${opInfo.orderName}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="order-index">배송지 :</td>
+                                        <td class="order-content" th:text="${opInfo.address}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="order-index">수령인 :</td>
+                                        <td class="order-content" th:text="${opInfo.recipient}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="order-index">도착예정일 :</td>
+                                        <td class="order-content" th:text="${opInfo.receiveDate}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="order-index">카드사 :</td>
+                                        <td class="order-content" th:text="${opInfo.cardCompany}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="order-index">최종 결제 금액 :</td>
+                                        <td class="order-content"
+                                            th:text="${#numbers.formatInteger(opInfo.totalAmount,0,'COMMA')}"></td>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div id="delivery-info">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div id="payment-footer">
+                        <span th:text="'구매 확정 시 ' + ${#numbers.formatInteger(opInfo.savePoint,0,'COMMA')} + '포인트가 적립됩니다'"
+                              style="font-size: 18px;color: #5b5b5b;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--로딩창-->
+<div id="loading">
+    <span style="font-size: 7rem;color: white;" class="visually-hidden">Loading...</span>
+</div>
+
+<th:block th:include="main/fragments/rootFooter"></th:block>
+<script>
+    function receipt(url) {
+        var name = "결제 영수증";
+        var option = "width = 800, height = 500, top = 500, left = 500"
+        window.open(url, name, option);
+    }
+
+    let modal = document.getElementById("order-modal-container")
+    let loading = document.getElementById("loading")
+
+    function modalClose() {
+        loading.style.display = "flex"
+        window.location.href = "/";
+    }
+
+    modal.addEventListener("click", e => {
+        const evTarget = e.target
+        if (evTarget.classList.contains("modal-overlay1")) {
+            loading.style.display = "flex"
+            window.location.href = "/";
+        }
+    })
+</script>
+<!--주소 모달 js-->
+<script>
+
+</script>
+<script src="/static/js/main/jquery.min.js"></script>
+<script src="/static/js/main/bootstrap.min.js"></script>
+<script src="/static/js/main/slick.min.js"></script>
+<script src="/static/js/main/nouislider.min.js"></script>
+<script src="/static/js/main/jquery.zoom.min.js"></script>
+<script src="/static/js/main/main.js"></script>
+</body>
+</html>

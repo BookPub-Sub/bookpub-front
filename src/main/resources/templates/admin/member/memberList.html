@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>멤버 리스트</title>
+    <link rel="stylesheet" href="/static/css/admin/adminStyle.css">
+    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+<div id="layoutSidenav">
+    <th:block th:include="admin/fragments/adminHeader"/>
+    <th:block th:include="admin/fragments/adminNavigationBar"/>
+
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">회원 목록</h1>
+<!--                <ol class="breadcrumb mb-4">-->
+<!--                    구독 세부 정보-->
+<!--                </ol>-->
+                <hr/>
+                <div align="right">
+                    <select id="searchPoint">
+                        <option>---분류---</option>
+                        <option value="nick">닉네임</option>
+                        <option value="id">아이디</option>
+                    </select>
+                    <input type="text" id="searchWord" placeholder="입력하세요."
+                           name="searchWord"
+                           minlength="1" required>
+                    <button class="btn btn-primary float-right" id="searchNames" onclick="searchNames()">
+                        검색
+                    </button>
+                </div>
+                <div>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">회원 등급</th>
+                            <th scope="col">회원 아이디</th>
+                            <th scope="col">회원 닉네임</th>
+                            <th scope="col">회원 이름</th>
+                            <th scope="col">회원 성별</th>
+                            <th scope="col">회원 생년</th>
+                            <th scope="col">회원 월일</th>
+                            <th scope="col">회원 이메일</th>
+                            <th scope="col">회원 포인트 잔액</th>
+                            <th scope="col">소셜 가입 여부</th>
+                            <th scope="col">회원 탈퇴 여부</th>
+                            <th scope="col">회원 차단 여부</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="member : ${content}">
+                            <td th:text="${member.tier}"></td>
+                            <td th:text="${member.memberId}"></td>
+                            <td th:text="${member.nickname}"></td>
+                            <td th:text="${member.name}"></td>
+                            <td th:text="${member.gender}"></td>
+                            <td th:text="${member.birthYear}"></td>
+                            <td th:text="${member.birthMonth}"></td>
+                            <td th:text="${member.email}"></td>
+                            <td th:text="${#numbers.formatInteger(member.point,0,'COMMA')}"></td>
+                            <td th:text="${member.isSocial}"></td>
+                            <td th:text="${member.isDeleted}"></td>
+                            <td>
+                                <form th:action="@{/admin/members/{memberNo}(memberNo=${member.memberNo})}"
+                                      method="post">
+                                    <button th:if="${member.isBlocked} == true" class="btn btn-outline-secondary">차단해제
+                                    </button>
+                                    <button th:unless="${member.isBlocked} == true" class="btn btn-outline-danger">차단
+                                    </button>
+                                </form>
+                                <!-- 차단 버튼 클릭시 JS 로 처리 -->
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${!previous} ? 'disabled'">
+                                <a class="page-link" th:href="@{ ${uri} + '?page=' + ${pageNum -1}+
+                                ${#strings.isEmpty(size) ? '' : '&size=' + size}}" tabindex="-1">Previous</a>
+                            </li>
+                            <th:block th:with="
+                            start=${(pageNum/5)*5 + 1},
+                            end=(${(totalPage ==0) ? 1 : (start + (4) < totalPage ? start + 4 : totalPage)})">
+                                <li class="page-item" th:each="page: ${#numbers.sequence(start,end)}">
+                                    <a class="page-link"
+                                       th:href="@{ ${uri} + '?page=' + ${page - 1}+
+                                ${#strings.isEmpty(size) ? '' : '&size=' + size}}"
+                                       th:text="${page}">
+                                    </a>
+                                </li>
+                            </th:block>
+                            <li class="page-item" th:classappend="${!next} ? 'disabled'">
+                                <a class="page-link" th:href="@{ ${uri} + '?page=' + ${pageNum + 1}+
+                                 ${#strings.isEmpty(size) ? '' : '&size=' + size}}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </main>
+        <th:block th:include="admin/fragments/adminFooter"/>
+    </div>
+</div>
+<script>
+    const searchPoint = document.getElementById("searchPoint");
+    const searchWord = document.getElementById("searchWord")
+
+    function searchNames() {
+        if (searchPoint.value === "nick") {
+            searchMemberByNickName();
+        } else if (searchPoint.value === "id") {
+            searchMembersById();
+        } else {
+            alert("분류를 선택하세요.")
+        }
+    }
+
+    function searchMembersById() {
+        window.location.href = "/admin/members?id=" + searchWord.value;
+    }
+
+    function searchMemberByNickName() {
+        window.location.href = "/admin/members?nick=" + searchWord.value;
+    }
+
+</script>
+</body>
+</html>

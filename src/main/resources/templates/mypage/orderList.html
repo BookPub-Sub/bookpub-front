@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>BookPub - 주문 목록</title>
+    <link rel="stylesheet" href="/static/css/mypage/styles.css">
+
+    <link type="text/css" rel="stylesheet" href="/static/css/main/root/style.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/mypage/orderdetail.css">
+
+    <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css'>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        function payment(event, orderNo) {
+            event.stopPropagation();
+            window.location.href = "/payment/" + orderNo;
+        }
+
+        function inquiry(productNo) {
+            window.location.href = '/members/inquiryForm/products/' + productNo;
+        }
+
+        function confirmBuy(orderProductNo) {
+            window.location.href = '/orders/confirm/order-product/' + orderProductNo;
+        }
+    </script>
+
+    <link rel='stylesheet'
+          href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css'>
+</head>
+<body>
+<th:block th:include="mypage/fragments/mypageSidebar"></th:block>
+</br>
+
+
+<div class="body-pd">
+    <section class="section_wrap">
+        <h3>주문 목록</h3>
+        </br>
+        <div class="container" style="padding-bottom: 5%">
+            <div style="display: flex; flex-direction: column; gap: 8px">
+                <div class="order_summary_box" th:each="order : ${orderList}">
+                    <div class="box_header"
+                         th:onclick="|location.href='/orders?orderNo=${order.orderNo}'|">
+                        <div class="label">
+                        <span class="order_date"
+                              th:text="${#temporals.format(order.createdAt, 'yyyy.MM.dd')}"></span>
+                            <span class="gap">|</span>
+                            <span class="order_num">주문번호 <span class="num"
+                                                               th:text="${order.orderNo}"></span></span>
+                            <span class="gap">|</span>
+                            <span class="order_num">송장번호 <span class="num"
+                                                               th:text="${order.invoiceNo}"></span></span>
+                            <span class="gap">|</span>
+                            <span class="order_num">상태 <span class="num"
+                                                             th:text="${order.orderState}"></span></span>
+                            <span class="gap">|</span>
+                            <span class="order_num">결제금액 <span class="num"
+                                                               th:text="${#numbers.formatInteger(order.totalAmount,0,'COMMA')}"></span></span>
+                            <span class="gap">|</span>
+                            <span class="order_num">배송일 <span class="num"
+                                                              th:text="${#temporals.format(order.receivedAt, 'yyyy.MM.dd')}"></span></span>
+                        </div>
+                        <div class="btn-box">
+                            <button th:if="${order.orderState != '결제대기' && order.orderState != '결제취소' && order.orderState != '구매확정' && order.orderState !='주문취소'}"
+                                    class="prd_btn" type="button"
+                                    th:onclick="modal(event, [[${order.orderNo}]])">환불
+                            </button>
+                            <button th:if="${order.orderState == '결제대기'}" class="prd_btn" type="button"
+                                    th:onclick="payment(event, [[${order.orderNo}]])">결제하러 가기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-box">
+                        <table class="tbl_prod">
+                            <colgroup>
+                                <col style="width: 4rem"/>
+                                <col style="width: 18rem;"/>
+                                <col style="width: 4rem;"/>
+                                <col style="width: 4rem;"/>
+                            </colgroup>
+                            <thead class="hidden">
+                            <tr>
+                                <th scope="col">상품정보</th>
+                                <th scope="col">금액</th>
+                                <th scope="col">배송정보</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="product : ${order.orderProducts}">
+                                <td class="prod_img">
+                                    <div>
+                                        <div>
+                                    <span class="img_box" th:if="${#strings.isEmpty(product.thumbnail)}">
+                                        <img class="img_thumbnail"
+                                             src="/static/img/main/no-image.png">
+                                    </span>
+                                            <span class="img_box" th:if="${not #strings.isEmpty(product.thumbnail)}">
+                                        <img class="img_thumbnail" th:src="@{${product.thumbnail}}" alt="No image">
+                                    </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="prod">
+                                    <div class="prod_area horizontal">
+                                        <div class="prod_thumb_box size_sm">
+                                <span class="badge_sm badge_bookpub">
+                                    <span class="text">BookPub 직배송!</span>
+                                </span>
+                                            <a th:href="'/products/'+${product.productNo}">
+                                                <h3 style="font-size: 1.25rem !important;"
+                                                    th:text="${product.title}"></h3>
+                                            </a>
+                                            <span class="text">수량 : </span><span class="val"
+                                                                                 th:text="${product.productAmount}"></span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="prod">
+                                <span class="price">
+                                    <span class="val"
+                                          th:text="${#numbers.formatInteger(product.salesPrice * product.productAmount,0,'COMMA')}"></span>
+                                    <span class="unit">원</span>
+                                </span>
+                                </td>
+
+                                <td class="prod">
+                                    <div class="btn_wrap full">
+                                        <div class="right_box">
+                                            <button th:if="${product.stateCode == '구매확정대기'}" type="button"
+                                                    style="color: black !important;"
+                                                    th:onclick="confirmBuy([[${product.orderProductNo}]])"
+                                                    class="prd_btn">
+                                                구매 확정
+                                            </button>
+                                            <button th:if="${product.stateCode != '결제대기'}"
+                                                    style="color: black !important;"
+                                                    type="button" class="prd_btn"
+                                                    th:onclick="inquiry([[${product.productNo}]])">
+                                                상품 문의
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <th:block th:with="start=${(currentPage/pageButtonNum)*pageButtonNum + 1}, end=(${(totalPages == 0) ?
+                                 1 : (start + (pageButtonNum - 1) < totalPages ? start + (pageButtonNum - 1) : totalPages)})">
+                            <li class="page-item">
+                                <a class="page-link" href="/orders/list?page=0">처음</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" th:if="${start > 1}"
+                                   th:href="'/orders/list?page='+${start - pageButtonNum -1}">
+                                    이전</a>
+                                <a class="page-link" th:if="${start <= 1}" style="cursor: not-allowed; color: gray;"
+                                   href="javascript:void(0)">이전</a>
+                            </li>
+                            <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}">
+                                <a class="page-link" th:href="@{/orders/list(page=(${page}-1))}"
+                                   th:text="${page}"></a></li>
+
+                            <li class="page-item">
+                                <a class="page-link" th:if="${end < totalPages}"
+                                   th:href="'/orders/list?page='+${start + pageButtonNum}">다음</a>
+                                <a class="page-link" th:if="${end >= totalPages}" style="cursor: not-allowed; color: gray;"
+                                   href="javascript:void(0)">다음</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" th:href="'/orders/list?page='+${totalPages - 1}">마지막</a>
+                            </li>
+                        </th:block>
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+    </section>
+</div>
+<div id="refund" class="modal-overlay2">
+
+</div>
+
+<script>
+    var modal1 = document.getElementById("refund");
+
+    function modal(event, orderNum) {
+        event.stopPropagation();
+
+        let refund = document.getElementById('refund');
+        refund.innerHTML = '';
+
+        let modalDiv = document.createElement('div');
+        modalDiv.classList.add('modal_box');
+        modalDiv.innerHTML = `<h2>환불</h2>
+            <form action="/payment/refund" method="post" style="width: 100%;">
+            <table style="width: 100%">
+                <tbody>
+               <tr>
+                    <th scope="row" style="padding: 10px 20px;" class="has_ip">환불사유</th>
+                </tr>
+                <tr>
+                    <input type="hidden" name="orderNo" value="${orderNum}">
+                    <td style="padding: 0 1rem 1rem 1rem;">
+                        <textarea id="refund-text"
+                                  name="cancelReason"
+                                  placeholder="환불 사유를 입력해주세요"></textarea>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div style="display: flex;justify-content: flex-end;padding: 0 1rem 0 0;">
+                <button type="submit" id="click"
+                        style="background-color: white;border: 1px solid #888888;border-radius: 10px;">환불신청
+                </button>
+            </div>
+        </form>`;
+
+        refund.appendChild(modalDiv);
+        modal1.style.display = "flex";
+    }
+
+    modal1.addEventListener("click", e => {
+        const evTarget = e.target
+        if (evTarget.classList.contains("modal-overlay2")) {
+            modal1.style.display = "none"
+        }
+    })
+
+    window.addEventListener("keyup", e => {
+        if (modal1.style.display === "flex" && e.key === "Escape") {
+            modal1.style.display = "none"
+        }
+    })
+</script>
+
+<script src="https://unpkg.com/ionicons@5.2.3/dist/ionicons.js"></script>
+<script src="/static/js/mypage/main.js"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.2.3/dist/ionicons/ionicons.esm.js"
+        data-stencil-namespace="ionicons"></script>
+<script src="https://unpkg.com/ionicons@5.2.3/dist/ionicons.js"></script>
+</body>
+</html>

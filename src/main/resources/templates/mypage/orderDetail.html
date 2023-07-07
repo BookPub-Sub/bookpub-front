@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>BookPub - 주문 상세</title>
+
+    <!-- Bootstrap -->
+
+    <link rel="stylesheet" href="/static/css/mypage/styles.css">
+    <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css'>
+    <link type="text/css" rel="stylesheet" href="/static/css/main/root/style.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/mypage/orderdetail.css">
+
+    <script src="/static/js/order/orderDetail.js"></script>
+</head>
+<body>
+<th:block th:include="mypage/fragments/mypageSidebar"></th:block>
+</br>
+<div class="body-pd">
+    <h3>주문/배송 조회 상세</h3>
+    <div class="order_summary_box">
+        <div class="box_header">
+            <div class="label">
+                <span class="order_date" th:text="${#temporals.format(orderDetail.createdAt, 'yyyy.MM.dd')}"></span>
+                <span class="gap">|</span>
+                <span class="order_num">주문번호 <span class="num" th:text="${orderDetail.orderNo}"></span></span>
+                <span class="gap">|</span>
+                <span class="order_num">송장번호 <span class="num" th:text="${orderDetail.invoiceNo}"></span></span>
+                <span class="gap">|</span>
+                <span class="order_num"><span class="num" th:text="${orderDetail.orderState}"></span></span>
+            </div>
+        </div>
+    </div>
+    </br>
+    </br>
+    <!--상품관련-->
+    <div class="tbl_prod_wrap type_myroom" id="commodityList">
+        <h3>상품</h3>
+        <table class="tbl_prod">
+            <colgroup>
+                <col style="width: 4rem"/>
+                <col style="width: 18rem;"/>
+                <col style="width: 4rem;"/>
+                <col style="width: 4rem;"/>
+            </colgroup>
+            <thead class="hidden">
+            <tr>
+                <th scope="col">상품정보</th>
+                <th scope="col">금액</th>
+                <th scope="col">배송정보</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${orderDetail.orderProducts}">
+                <td class="prod_img" style="padding: 1rem 0;">
+                    <div>
+                        <div>
+                                    <span class="img_box" th:if="${#strings.isEmpty(product.thumbnail)}">
+                                        <img class="img_thumbnail" src="/static/img/main/no-image.png">
+                                    </span>
+                            <span class="img_box" th:if="${not #strings.isEmpty(product.thumbnail)}">
+                                        <img class="img_thumbnail" th:src="@{${product.thumbnail}}" alt="No image">
+                                    </span>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="prod">
+                                <span class="badge_sm badge_bookpub">
+                                    <span class="text">BookPub 직배송!</span>
+                                </span>
+                    <a th:href="'/products/'+ ${product.productNo}">
+                        <h3 style="font-size: 1.25rem !important;" th:text="${product.title}"></h3>
+                    </a>
+                    <span class="text">수량 : </span><span class="val"
+                                                         th:text="${#numbers.formatInteger(product.productAmount,0,'COMMA')}"></span>
+                </td>
+
+
+                <td class="prod">
+                                <span class="price">
+                                    <div class="order_num" th:if="${!product.stateCode.equals('결제완료')}">
+                                        <span class="order_num" th:text="${product.stateCode}"></span>
+                                    </div>
+                                    <span class="val"
+                                          th:text="${#numbers.formatInteger(product.salesPrice * product.productAmount,0,'COMMA')}"></span>
+                                    <span class="unit">원</span>
+                                </span>
+                </td>
+                <td class="prod">
+                    <div class="right_box">
+                        <button th:if="${product.stateCode != '구매확정' && product.stateCode != '환불' && product.stateCode != '결제대기'}"
+                                type="button" class="prd_btn"
+                                th:onclick="modal(event,[[${orderDetail.orderNo}]] ,[[${product.orderProductNo}]])">
+                            반품 신청
+                        </button>
+                        <button th:if="${product.stateCode == '구매확정대기'}"
+                                type="button" class="prd_btn"
+                                th:onclick="modalOpen(event,[[${orderDetail.orderNo}]] ,[[${product.orderProductNo}]])">
+                            교환 신청
+                        </button>
+                        <button th:if="${product.stateCode != '결제대기'}"
+                                style="color: black !important;"
+                                type="button" class="prd_btn"
+                                th:onclick="inquiry([[${product.productNo}]])">
+                            상품 문의
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="body-pd">
+    <div style="margin-top: 50px;">
+        <!-- 배송정보 -->
+        <div class="title_wrap title_size_md">
+            <h3>배송</h3>
+        </div>
+
+        <div class="tbl_row_wrap">
+            <table class="tbl_row">
+                <colgroup>
+                    <col style="width: 140px;"/>
+                    <col style="width: auto;"/>
+                </colgroup>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <tr>
+            <h4>송장 번호</h4>
+            <td>
+                <div class="address_item no_line">
+                    <div class="address_info_box">
+                        <div class="address_person">
+                            <span class="phone_number" th:if="${#strings.isEmpty(orderDetail.invoiceNo)}"
+                                  th:text="${orderDetail.orderState}"></span>
+                            <span class="phone_number" th:if="${#strings.isEmpty(orderDetail.invoiceNo)}">입니다.</span>
+
+                            <span class="phone_number" th:if="${not #strings.isEmpty(orderDetail.invoiceNo)}"
+                                  th:text="${orderDetail.invoiceNo}"></span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            </br>
+            <h4 th:if="${orderDetail.getBuyerName() != orderDetail.recipientName}">주문자 정보</h4>
+            <td>
+                <div class="address_item no_line">
+                    <div class="address_info_box">
+                        <div class="address_person">
+                            <span class="name"><span th:text="${orderDetail.buyerName}"></span> / </span>
+                            <span class="phone_number" th:text="${orderDetail.buyerNumber}"></span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            </br>
+            <h4>배송지 정보</h4>
+            <td>
+                <div class="address_item no_line">
+                    <div class="address_info_box">
+                        <div class="address_person">
+                            <span class="name"><span th:text="${orderDetail.recipientName}"></span> / </span>
+                            <span class="phone_number" th:text="${orderDetail.recipientNumber}"></span>
+                        </div>
+                        <div class="address"
+                             th:text="${orderDetail.addressBase + ' ' + orderDetail.addressDetail}"></div>
+                        <div class="msg">
+                            <div>배송선택일자 :</div>&ensp;
+                            <div class="text">
+                                <span th:text="${#temporals.format(orderDetail.receivedAt, 'yyyy.MM.dd')}"></span>
+                            </div>
+                        </div>
+                        <div class="msg">
+                            <div>배송요청사항 :</div>&ensp;
+                            <div class="text">
+                                <span th:text="${orderDetail.orderRequest}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </div>
+</div>
+
+<div class="body-pd">
+    <div style="margin-top: 50px;">
+        <div class="title_wrap title_size_md">
+            <h3>결제</h3>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col"> 정상가</th>
+                <th scope="col"> 쿠폰사용</th>
+                <th scope="col"> 포인트사용</th>
+                <th scope="col"> 포장비</th>
+                <th scope="col"> 배송비</th>
+                <th scope="col"> 결제가</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row"><span th:text="${#numbers.formatInteger(originPrice,0,'COMMA')}"></span>원</th>
+
+                <th th:if="${orderDetail.couponAmount <= 0}">
+                    <span>
+                    <span>미사용</span>
+                    </span>
+                </th>
+                <th th:if="${orderDetail.couponAmount > 0}">
+                    <span style="color: red">-
+                        <span th:text="${#numbers.formatInteger(orderDetail.couponAmount,0,'COMMA')}"></span>
+                        원</span>
+                </th>
+
+                <th th:if="${orderDetail.pointAmount <= 0}">
+                    <span>
+                    <span>미사용</span>
+                    </span>
+                </th>
+                <th th:if="${orderDetail.pointAmount > 0}">
+                    <span style="color: red">-
+                    <span th:text="${#numbers.formatInteger(orderDetail.pointAmount,0,'COMMA')}"></span>
+                    원</span>
+                </th>
+
+                <th th:if="${orderDetail.packaged}">
+                    <span style="color: blue">+
+                    <span th:text="${#numbers.formatInteger(orderDetail.packageAmount,0,'COMMA')}"></span>
+                    원</span>
+                </th>
+                <th th:if="${!orderDetail.packaged}">
+                    <span>선택 안함</span>
+                </th>
+
+                <th th:if="${orderDetail.deliveryAmount <= 0}">
+                    <span>
+                    <span>무료</span>
+                    </span>
+                </th>
+                <th th:if="${orderDetail.deliveryAmount > 0}">
+                    <span style="color: blue">+
+                    <span th:text="${#numbers.formatInteger(orderDetail.deliveryAmount,0,'COMMA')}"></span>
+                    원</span>
+                </th>
+
+                <th><span th:text="${#numbers.formatInteger(orderDetail.totalAmount,0,'COMMA')}"></span>원</th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id="refund" class="modal-overlay2">
+</div>
+<div id="exchange" class="modal-overlay3">
+</div>
+
+<script>
+
+    const modal2 = document.getElementById("exchange");
+    const modal1 = document.getElementById("refund");
+
+    modal1.addEventListener("click", e => {
+        const evTarget = e.target
+        if (evTarget.classList.contains("modal-overlay2")) {
+            modal1.style.display = "none"
+        }
+    })
+    modal2.addEventListener("click", e => {
+        const evTarget = e.target
+        if (evTarget.classList.contains("modal-overlay3")) {
+            modal2.style.display = "none"
+        }
+    })
+
+    window.addEventListener("keyup", e => {
+        if (modal1.style.display === "flex" && e.key === "Escape") {
+            modal1.style.display = "none"
+        }
+    })
+
+    window.addEventListener("keyup", e => {
+        if (modal2.style.display === "flex" && e.key === "Escape") {
+            modal2.style.display = "none"
+        }
+    })
+</script>
+
+<script src="https://unpkg.com/ionicons@5.2.3/dist/ionicons.js"></script>
+<script src="/static/js/mypage/main.js"></script>
+</br>
+</br>
+</br>
+</body>
+</html>

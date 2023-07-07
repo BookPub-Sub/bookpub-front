@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        #category-list-div {
+            min-width: 15rem;
+        }
+
+        #nav-category:hover > #category-list-div {
+            display: flex;
+        }
+
+        #notMember-order {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .notMember-order-modal {
+            background-color: white;
+            display: flex;
+            justify-content: start;
+            border-radius: 10px;
+            width: 40%;
+            height: 40vh;
+            align-items: center;
+            padding: 30px 0;
+            flex-direction: column;
+            gap: 13px;
+        }
+
+
+        #click {
+            background-color: white;
+            padding: 3px 10px 3px 10px;
+            border-radius: 14px;
+            border: 1px solid #7f7f7f;
+        }
+
+        #click:hover {
+            background-color: #dcdcdc;
+        }
+
+        .modal-btn-box {
+            display: flex;
+            padding-bottom: 20px;
+            justify-content: end;
+            padding-right: 2rem;
+        }
+    </style>
+    <script>
+        function submitCheck() {
+            let form = document.getElementById('submitForm');
+
+            let order = document.getElementById('orderId');
+            let phone = document.getElementById('phoneNo');
+
+            if (order.value === "" || phone.value === "") {
+                alert('주문번호와 핸드폰번호를 입력해주세요')
+                return false;
+            }else{
+                form.submit();
+            }
+        }
+    </script>
+</head>
+<body>
+<header>
+    <p style="display: none" id="memberNo" th:text="${memberNo}"></p>
+    <!-- TOP HEADER -->
+    <div id="top-header">
+        <div class="container">
+            <ul class="header-links pull-left">
+                <li><i class="fa fa-phone"></i>
+                    <span style="color: aliceblue"> 062-230-6170</span>
+                </li>
+                <li><i class="fa fa-envelope-o"></i><span style="color: aliceblue"> book-pub@gmail.com</span></li>
+
+            </ul>
+            <ul class="header-links pull-right">
+                <li>
+                    <a sec:authorize="hasAuthority('ROLE_ADMIN')" href="/admin" class="nav-link" style="color: white">관리자
+                        페이지</a>
+                </li>
+                <li>
+                    <a sec:authorize="isAnonymous()" class="nav-link" style="color: white" href="/login">로그인</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link" style="color: white" href="/logout">로그아웃</a>
+                </li>
+
+                <li class="nav-item">
+                    <a sec:authorize="isAnonymous()" class="nav-link" style="color: white" href="/signup">회원가입</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link" style="color: white" href="/members">마이페이지</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="header">
+        <div class="container">
+            <div class="row" style="display: flex;align-items: center;justify-content: center;">
+                <div class="col-md-3">
+                    <div class="header-logo">
+                        <a href="/" class="logo">
+                            <img src="/static/img/main/bookpub-logo.png" height="130"
+                                 width="170" alt="">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="header-search">
+                        <form action="/search" method="get">
+                            <select class="input-select" name="type">
+                                <option value="0">통합 검색</option>
+                                <option value="1">제목 검색</option>
+                            </select>
+                            <input class="input" name="q" placeholder="Search here">
+                            <button class="search-btn">검색</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-3 clearfix">
+                    <div class="header-ctn">
+                        <div>
+                            <a href="javascript:void(0)" onclick="wishlist()">
+                                <i class="fa fa-heart"></i>
+                                <span>찜 목록</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown">
+                            <a href="/cart">
+                                <i class="fa fa-shopping-cart"></i>
+                                <span>장바구니</span>
+                                <div class="qty" th:text="${cartCount}"></div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav id="navigation">
+        <div class="container">
+            <div id="responsive-nav">
+                <ul class="main-nav nav navbar-nav">
+                    <li class="active"><a href="/">홈</a></li>
+
+                    <li id="nav-category">
+                        <a href="javascript:void(0)">분야찾기</a>
+                        <div id="category-list-div" class="dropdown-menu" style="padding: 0">
+                            <div
+                                    style="width: 14rem; align-items: center; display: flex; flex-direction: column"
+                                    th:each="parent: ${category}"
+                                    th:classappend="${parentStat.last ? '' : 'ma-r'}">
+                                <div
+                                        style="background-color: #D10024; width: 100%; padding: 1rem; text-align: center">
+                                    <a class="fw-bolder bg-black"
+                                       th:href="@{/categories/{id}(id=${parent.categoryNo})}"
+                                       th:text="${parent.categoryName}"
+                                       style="color: white; font-weight: bold; font-size: 1.5rem"></a>
+                                </div>
+                                <div th:each="child: ${parent.childList}"
+                                     style="margin-top: 1rem; margin-bottom: 1rem">
+                                    <a th:href="@{/categories/{id}(id=${child.categoryNo})}"
+                                       th:text="${child.categoryName}"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">유형별찾기</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/types/1">베스트셀러</a></li>
+                            <li><a href="/types/2">신간</a></li>
+                            <li><a href="/types/3">추천</a></li>
+                            <li><a href="/types/4">인기</a></li>
+                            <li><a href="/types/5">할인</a></li>
+                            <li><a href="/types/6">기본</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">이벤트</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/coupon-month">이달의 쿠폰</a></li>
+                            <li><a href="/tier-coupons">등급별 쿠폰</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="/services/faq/">FAQ</a></li>
+                    <li><a href="/services/notice/">공지사항</a></li>
+                    <li><a sec:authorize="!isAuthenticated()" href="javascript:void(0)" onclick="modalOpen()">비회원
+                        주문조회</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!--비회원 주문 모달창-->
+    <div id="notMember-order" class="modal-overlay2">
+        <div class="notMember-order-modal">
+            <h2>비회원 주문 조회</h2>
+            <form action="/orders/non" method="post" style="width: 100%" id="submitForm">
+                <table style="width: 100%">
+                    <tbody>
+                    <tr>
+                        <th scope="row" style="padding: 10px" class="has_ip">주문번호</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0 60px 10px 10px;">
+                            <input style="width: 100%; padding: 7px;border-radius: 18px;border: 1px solid #848383;"
+                                   id="orderId"
+                                   name="orderId"
+                                   placeholder="주문 번호를 입력해주세요">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding: 10px">주문인 전화번호</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0 60px 10px 10px;">
+                            <input style="width: 100%;padding: 7px;border-radius: 18px;border: 1px solid #848383;"
+                                   id="phoneNo"
+                                   name="phoneNo"
+                                   placeholder="전화번호를 입력해주세요(-제외)">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="modal-btn-box">
+                    <button type="button" onclick="submitCheck()" id="click">조회</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <script>
+        function modalOpen() {
+            let modal1 = document.getElementById("notMember-order");
+            modal1.style.display = "flex";
+        }
+
+        let modal1 = document.getElementById("notMember-order");
+        modal1.addEventListener("click", e => {
+            const evTarget = e.target
+            if (evTarget.classList.contains("modal-overlay2")) {
+                modal1.style.display = "none"
+            }
+        })
+
+        window.addEventListener("keyup", e => {
+            if (modal1.style.display === "flex" && e.key === "Escape") {
+                modal1.style.display = "none"
+            }
+        })
+    </script>
+</header>
+</body>
+</html>

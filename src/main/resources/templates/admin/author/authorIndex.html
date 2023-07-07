@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BookPub</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet"/>
+
+    <link rel="stylesheet" href="/static/css/admin/adminStyle.css">
+
+    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+
+</head>
+<body class="sb-nav-fixed">
+
+<div id="layoutSidenav">
+    <th:block th:include="admin/fragments/adminHeader"/>
+    <th:block th:include="admin/fragments/adminNavigationBar"/>
+
+    <div class="modal fade" id="authorAddModal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">저자 등록</h3>
+                </div>
+                <div class="modal-body">
+                    <form action="/admin/authors/add" class="was-validated" method="post">
+                        <div class="form-group">
+                            <label for="addAuthorName">저자 이름</label>
+                            <input type="text" class="form-control" id="addAuthorName"
+                                   placeholder="저자 이름" name="authorName" minlength="2"
+                                   maxlength="20" required>
+                            <div class="invalid-feedback">최소 1글자, 최대 200글자</div>
+                        </div>
+
+                        <br/>
+
+                        <div class="form-group">
+                            <label for="addMainBook">대표작</label>
+                            <input type="text" class="form-control" id="addMainBook"
+                                   placeholder="대표작"
+                                   name="mainBook">
+                        </div>
+                        <br/>
+                        <button type="button" class="btn btn-light" data-dismiss="modal"
+                                style="margin-left:70%;">취소
+                        </button>
+                        <button type="submit" class="btn btn-primary">등록</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="authorModifyModal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">저자 수정</h3>
+                </div>
+                <div class="modal-body">
+                    <form action="/admin/authors/modify" class="was-validated" method="post">
+                        <div class="form-group">
+                            <lable for="modifyTagNo">변경할 저자 번호</lable>
+                            <input type="text" class="form-control" id="modifyAuthorNo"
+                                   placeholder="저자 번호" name="modifyAuthorNo" required>
+                            <div class="invalid-feedback">번호를 입력 해주세요.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="modifyAuthorName">저자 이름</label>
+                            <input type="text" class="form-control" id="modifyAuthorName"
+                                   placeholder="변경할 이름" name="modifyAuthorName" minlength="2"
+                                   maxlength="20" required>
+                            <div class="invalid-feedback">최소 1글자, 최대 200글자</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="modifyMainBook">대표작</label>
+                            <input type="text" class="form-control" id="modifyMainBook"
+                                   placeholder="변경할 대표작"
+                                   name="modifyMainBook" maxlength="100">
+                            <div class="invalid-feedback">최대 100글자</div>
+                        </div>
+                        </br>
+
+                        <button type="button" class="btn btn-light" data-dismiss="modal"
+                                style="margin-left:70%;">취소
+                        </button>
+                        <button class="btn btn-primary">등록</button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">저자 목록</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item active">저자 등록, 수정, 삭제</li>
+                </ol>
+
+                <hr/>
+
+                <div align="right">
+                    <button class="btn btn-primary float-right" data-toggle="modal"
+                            data-target="#authorAddModal">저자 등록
+                    </button>
+                    <button class="btn btn-info float-right" data-toggle="modal"
+                            data-target="#authorModifyModal">저자 수정
+                    </button>
+                </div>
+
+
+                <br/>
+
+                <div>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>저자 번호</th>
+                            <th>저자 이름</th>
+                            <th>대표작</th>
+                        </tr>
+                        </thead>
+                        <tbod>
+                            <tr th:each="author : ${authors}">
+                                <td th:text="${author.authorNo}"></td>
+                                <td th:text="${author.authorName}"></td>
+                                <td th:text="${author.mainBook}"></td>
+                            </tr>
+                        </tbod>
+                    </table>
+
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            <th:block th:with="start=${(currentPage/pageButtonNum)*pageButtonNum + 1}, end=(${(totalPages == 0) ?
+                                 1 : (start + (pageButtonNum - 1) < totalPages ? start + (pageButtonNum - 1) : totalPages)})">
+                                <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}">
+                                    <a class="page-link" th:href="@{/admin/authors(page=(${page}-1))}"
+                                       th:text="${page}"></a></li>
+                            </th:block>
+                        </ul>
+                    </nav>
+
+                </div>
+
+            </div>
+
+        </main>
+
+
+        <th:block th:include="admin/fragments/adminFooter"/>
+    </div>
+
+</div>
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+</html>
