@@ -195,12 +195,12 @@ public class MemberOrderController {
             List<String> products = CartUtils.parsingCart(cart);
             List<OrderProductDto> orderProductDtoList =
                     productService.orderProductInCart(products, isLoginUser);
-
             model.addAttribute("products", orderProductDtoList);
         }
 
         List<GetOrderPolicyResponseDto> orderRequestPolicy
-                = pricePolicyService.getOrderRequestPolicy();
+                = List.of(new GetOrderPolicyResponseDto(2, "포장비", 1_000L),
+                            new GetOrderPolicyResponseDto(1, "배송비", 3_000L));
 
         categoryUtils.categoriesView(model);
         cartUtils.getCountInCart(cartCookie, model);

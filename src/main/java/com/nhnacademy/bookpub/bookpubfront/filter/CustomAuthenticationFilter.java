@@ -60,19 +60,16 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            log.info("sessionCookie (auth-session)= {}", sessionCookie.getValue());
 
             Cookie jwtCookie = CookieUtil.findCookie(JwtUtil.JWT_COOKIE);
             if (notExistCookie(request, response, filterChain, jwtCookie)) {
                 return;
             }
 
-            log.info("jwtCookie (bookpub_accessToken)= {}", jwtCookie.getValue());
 
             String sessionId = Objects.requireNonNull(sessionCookie).getValue();
             MemberDetailResponseDto member = (MemberDetailResponseDto)
                     redisTemplate.opsForHash().get(AUTHENTICATION, sessionId);
-            log.info("member response dto = {}", member);
             if (notExistLoginData(request, response, filterChain, member)) {
                 return;
             }
@@ -85,7 +82,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                     member.getMemberNo().toString(),
                     objectMapper.writeValueAsString(member),
                     authorities);
-            log.info("authenticationToken = {}", authenticationToken);
 
             context.setAuthentication(authenticationToken);
 

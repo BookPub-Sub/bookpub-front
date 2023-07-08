@@ -3,6 +3,7 @@ package com.nhnacademy.bookpub.bookpubfront.pricepolicy.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 오더 view를 구성하는데 필요한 정책들을 반환받은 dto입니다.
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class GetOrderPolicyResponseDto {
     private Integer policyNo;
     private String policyName;
