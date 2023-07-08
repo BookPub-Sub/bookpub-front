@@ -47,11 +47,15 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         ResponseEntity<Void> jwtResponse
                 = memberAdaptor.loginRequest(loginMemberRequestDto);
 
+        log.info("jwt Response = {}", jwtResponse);
+
         Long expireTime = getExpireTime(jwtResponse);
         String accessToken = getAccessToken(jwtResponse);
 
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(accessToken, password);
+
+        log.info("token = {}", token);
 
         Cookie cookie = makeJwtCookie(accessToken, expireTime);
 

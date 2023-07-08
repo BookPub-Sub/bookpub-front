@@ -54,19 +54,25 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+
             Cookie sessionCookie = CookieUtil.findCookie(SESSION_COOKIE);
             if (notExistCookie(request, response, filterChain, sessionCookie)) {
                 return;
             }
+
+            log.info("sessionCookie (auth-session)= {}", sessionCookie.getValue());
 
             Cookie jwtCookie = CookieUtil.findCookie(JwtUtil.JWT_COOKIE);
             if (notExistCookie(request, response, filterChain, jwtCookie)) {
                 return;
             }
 
+            log.info("jwtCookie (bookpub_accessToken)= {}", jwtCookie.getValue());
+
             String sessionId = Objects.requireNonNull(sessionCookie).getValue();
             MemberDetailResponseDto member = (MemberDetailResponseDto)
                     redisTemplate.opsForHash().get(AUTHENTICATION, sessionId);
+            log.info("member response dto = {}", member);
             if (notExistLoginData(request, response, filterChain, member)) {
                 return;
             }
@@ -75,11 +81,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                     Utils.makeAuthorities(Objects.requireNonNull(member).getAuthorities());
 
             SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(new UsernamePasswordAuthenticationToken(
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     member.getMemberNo().toString(),
                     objectMapper.writeValueAsString(member),
-                    authorities)
-            );
+                    authorities);
+            log.info("authenticationToken = {}", authenticationToken);
+
+            context.setAuthentication(authenticationToken);
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {

@@ -3,6 +3,7 @@ package com.nhnacademy.bookpub.bookpubfront.member.dto.response;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 멤버에대한 상세 정보를 받는 메서드입니다.
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@ToString
 public class MemberDetailResponseDto {
     private Long memberNo;
     private String memberName;
