@@ -34,7 +34,7 @@ public class JwtUtil {
         String tokenInfo = accessToken + "." + expireTime;
 
         Cookie cookie = new Cookie(JwtUtil.JWT_COOKIE, tokenInfo);
-//        cookie.setSecure(true);
+        cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(EXPIRE_TIME);
         return cookie;
