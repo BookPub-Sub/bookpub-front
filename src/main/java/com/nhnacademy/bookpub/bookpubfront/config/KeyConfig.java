@@ -59,7 +59,7 @@ public class KeyConfig {
     public String keyStore(String keyId) {
         try {
             KeyStore clientStore = KeyStore.getInstance("PKCS12");
-            InputStream result = new ClassPathResource("bookpub.p12").getInputStream();
+            InputStream result = new ClassPathResource("BookPub_V2.p12").getInputStream();
             clientStore.load(result, password.toCharArray());
 
             SSLContext sslContext = SSLContextBuilder.create()
